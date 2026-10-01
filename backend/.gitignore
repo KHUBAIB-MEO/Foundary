@@ -1,0 +1,16 @@
+# Virtual environment
+.venv/
+
+# Environment variables & secrets
+.env
+
+# Python bytecode & cache
+__pycache__/
+*.pyc
+
+# Local database files
+*.db
+
+# Ignore uploaded files, but keep empty directory
+uploads/*
+!uploads/.gitkeep

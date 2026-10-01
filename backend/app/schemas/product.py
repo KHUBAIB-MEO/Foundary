@@ -4,6 +4,7 @@ from uuid import UUID
 from datetime import datetime
 
 class ProductCreate(BaseModel):
+
     title: str = Field(..., min_length=1, max_length=200)
     description: str | None = None
     price: Decimal = Field(..., gt=0)
@@ -40,4 +41,3 @@ class ProductResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     images: list[ProductImageResponse] = []
-
