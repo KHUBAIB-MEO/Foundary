@@ -1,7 +1,8 @@
-from decimal import Decimal
-from pydantic import BaseModel, Field, ConfigDict
-from uuid import UUID
 from datetime import datetime
+from decimal import Decimal
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 class ProductCreate(BaseModel):
 
@@ -28,6 +29,11 @@ class ProductImageResponse(BaseModel):
     file_type: str
     created_at: datetime 
 
+    @computed_field
+    @property
+    def url(self) -> str:
+        """The address the app uses to show the image, e.g. /uploads/products/abc.jpg"""
+        return f"/uploads/{self.file_path}"
 
 class ProductResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -41,3 +47,11 @@ class ProductResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     images: list[ProductImageResponse] = []
+
+
+class ProductListResponse(BaseModel):
+    """One page of products plus the numbers the app needs to build 'next page'."""
+    items: list[ProductResponse]
+    total: int
+    page: int
+    page_size: int

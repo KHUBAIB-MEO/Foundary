@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# The 'backend' folder (two levels above this file: core -> app -> backend)
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -27,6 +32,12 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
 
+   # --- Product images ---
+    UPLOAD_DIR: Path = BASE_DIR / "uploads"
+    MAX_IMAGE_SIZE_MB: int = 5
+    MAX_IMAGES_PER_PRODUCT: int = 5
 
+
+    
 # One shared object. Other files do: from app.core.config import settings
 settings = Settings()
