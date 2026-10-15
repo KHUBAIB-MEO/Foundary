@@ -7,10 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
+from app.models.payment import Payment
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.order import CheckoutRequest
-
+from app.services.payment_providers import get_provider
 
 async def get_order(db: AsyncSession, order_id: uuid.UUID) -> Order:
     query = select(Order).where(Order.id == order_id).execution_options(populate_existing=True)
@@ -114,6 +115,18 @@ async def cancel_order(db: AsyncSession, order_id: uuid.UUID, customer: User) ->
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "Only unpaid orders can be cancelled"
         )
+
+    # A payment may have succeeded at the provider but not been confirmed yet.
+    # Never cancel an order the customer has already paid for.
+    pending_query = select(Payment).where(Payment.order_id == order.id, Payment.status == "pending")
+    for payment in (await db.execute(pending_query)).scalars().all():
+        if get_provider().get_status(payment).status == "succeeded":
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "A payment for this order was received. Call confirm-payment instead of cancelling",
+            )
+        payment.status = "cancelled"  # close the open payment attempt
+
     for item in sorted(order.items, key=lambda i: str(i.product_id)):
         if item.product_id is not None:  # give the stock back
             product = await _lock_product(db, item.product_id)

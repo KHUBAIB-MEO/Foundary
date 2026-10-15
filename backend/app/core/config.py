@@ -37,7 +37,9 @@ class Settings(BaseSettings):
     MAX_IMAGE_SIZE_MB: int = 5
     MAX_IMAGES_PER_PRODUCT: int = 5
 
-
+    # --- Payments ---
+    PAYMENT_PROVIDER: str = "mock"  # "mock" now, "stripe" later
+    PAYMENT_CURRENCY: str = "usd"
     
 # One shared object. Other files do: from app.core.config import settings
 settings = Settings()
